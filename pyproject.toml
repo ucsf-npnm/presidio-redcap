@@ -2,6 +2,7 @@
 name = "presidio-redcap"
 version = "0.1.0"
 description = "Interface for Behavioral and Biometric Database for Presidio"
+documentation = "https://presidio-redcap.readthedocs.io"
 authors = ["Ankit Khambhati <akhambhati@gmail.com>"]
 
 [tool.poetry.dependencies]
@@ -28,6 +29,7 @@ xdoctest = "^1.0.0"
 Pygments = "^2.11.2"
 Sphinx = "^4.5.0"
 sphinx-autodoc-typehints = "^1.18.1"
+codecov = "^2.1.12"
 
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]
