@@ -22,6 +22,12 @@ safety = "^1.10.3"
 mypy = "^0.942"
 typeguard = "^2.13.3"
 flake8-annotations = "^2.8.0"
+flake8-docstrings = "^1.6.0"
+darglint = "^1.8.1"
+xdoctest = "^1.0.0"
+Pygments = "^2.11.2"
+Sphinx = "^4.5.0"
+sphinx-autodoc-typehints = "^1.18.1"
 
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]
