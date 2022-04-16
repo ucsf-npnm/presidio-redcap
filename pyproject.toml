@@ -45,11 +45,12 @@ source = ["presidio_redcap"]
 show_missing = true
 fail_under = 100
 
-
 [tool.commitizen]
 name = "cz_conventional_commits"
 version = "0.2.0"
 tag_format = "$version"
+version_files = "src/__init__.py"
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
