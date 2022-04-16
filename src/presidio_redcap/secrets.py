@@ -11,9 +11,6 @@ from typing import List
 import dacite
 
 
-ENV_SECRETS = str(os.environ.get("PRESIDIO_SECRETS"))
-
-
 @dataclass(frozen=True)
 class RedcapSubject:
     """Holds pertinent secrets for individual subjects in the Presidio Redcap.
@@ -40,6 +37,7 @@ class RedcapSecrets:
     SUBJECTS: List[RedcapSubject]
 
 
+ENV_SECRETS = str(os.environ.get("PRESIDIO_SECRETS"))
 redcap = dacite.from_dict(
     data_class=RedcapSecrets, data=json.load(open(ENV_SECRETS, "rb"))["REDCAP"]
 )
