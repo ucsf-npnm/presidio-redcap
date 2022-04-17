@@ -47,7 +47,6 @@ class RedcapSecrets:
 
     def get_subject(self, subject_id: str) -> RedcapSubject:
         """Retrieve RedcapSubject API keys for a desired subject."""
-
         return self.SUBJECTS[self.subject_ids.index(subject_id)]
 
 
