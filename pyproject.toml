@@ -51,7 +51,7 @@ name = "cz_conventional_commits"
 version = "0.2.0"
 tag_format = "$version"
 version_files = [
-    "src/presidio-redcap/__init__.py",
+    "src/presidio_redcap/__init__.py",
     "pyproject.toml:version"
 ]
 bump_message = "bump: $current_version → $new_version [skip-ci]"
