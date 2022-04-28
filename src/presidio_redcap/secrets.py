@@ -2,13 +2,17 @@
 """Verify and validate user-specific secrets for Presidio."""
 
 
+# Import #
+# Standard Libraries #
 from dataclasses import dataclass
 import json
 import os
 from typing import List
 
-
+# Third-Party Packages #
 import dacite
+
+# Local Packages #
 
 
 @dataclass(frozen=True)
@@ -35,6 +39,15 @@ class RedcapSecrets:
 
     API_URL: str
     SUBJECTS: List[RedcapSubject]
+
+    @property
+    def subject_ids(self) -> List:
+        """List of subject names held by the object."""
+        return [rc_subject.NAME for rc_subject in self.SUBJECTS]
+
+    def get_subject(self, subject_id: str) -> RedcapSubject:
+        """Retrieve RedcapSubject API keys for a desired subject."""
+        return self.SUBJECTS[self.subject_ids.index(subject_id)]
 
 
 ENV_SECRETS = str(os.environ.get("PRESIDIO_SECRETS"))

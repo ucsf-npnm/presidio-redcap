@@ -15,3 +15,13 @@ def test_redcap_loader(mock_env) -> None:
     from presidio_redcap import secrets
 
     assert isinstance(secrets.redcap, secrets.RedcapSecrets)
+
+
+def test_redcap_get_subject(mock_env) -> None:
+    """Ensure RedcapSubject can be retrieved."""
+    from presidio_redcap import secrets
+
+    rc_subject = secrets.redcap.get_subject("S2")
+    print("\n {}".format(secrets.redcap.subject_ids))
+    print("\n {}".format(rc_subject))
+    assert isinstance(rc_subject, secrets.RedcapSubject)
