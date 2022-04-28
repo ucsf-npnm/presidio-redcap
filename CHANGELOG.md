@@ -1,3 +1,15 @@
+## 0.1.0 (2022-04-28)
+
+### Fix
+
+- ensure that nanmax ignores nans over max
+
+### Feat
+
+- define survey items, collections, and templates for Presidio surveys
+- created class to extract project records and construct dataframe from RedCap interface
+- add method for indexing and retrieving subjects from RedcapSecrets
+
 ## 0.0.1 (2022-04-17)
 
 ### Fix
