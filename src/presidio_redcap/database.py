@@ -94,7 +94,13 @@ class RedcapDB:
         # Aggregate renamed fields that share root field from SurveyCollection
         survey_dataframe = pd.concat(
             [
-                pd.DataFrame(survey_dataframe[col].max(axis=1), columns=[col])
+                pd.DataFrame(
+                    np.nanmax(
+                        survey_dataframe[col].values.reshape(len(survey_dataframe), -1),
+                        axis=1,
+                    ),
+                    columns=[col],
+                )
                 for col in survey_dataframe.columns.unique()
             ],
             axis=1,
