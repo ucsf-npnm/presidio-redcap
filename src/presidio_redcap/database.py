@@ -40,7 +40,7 @@ class RedcapDB:
     def full_dataframe(self) -> pd.DataFrame:
         """Construct a DataFrame using all RedCap Project records."""
         df = pd.concat(
-            [pd.DataFrame.from_dict(proj.export_records()) for proj in self.projects]
+            [pd.DataFrame.from_dict(proj.export_records(export_survey_fields=True)) for proj in self.projects]
         ).reset_index(drop=True)
         return df
 
@@ -55,7 +55,6 @@ class RedcapDB:
         time_frame = (
             self.full_dataframe[date_time_fields]
             .apply(lambda x: pd.to_datetime(x, errors="coerce"))
-            .T.max(axis=0)
         )
         time_frame.name = "Timestamp"
         return time_frame
@@ -108,7 +107,10 @@ class RedcapDB:
 
         # Re-index the rows using Timestamp information
         if index_by_survey_times:
-            survey_dataframe.index = self.survey_times
+            survey_dataframe = pd.merge(survey_dataframe, 
+                    self.survey_times, left_index=True, right_index=True)
+            survey_dataframe = survey_dataframe.set_index(
+                    list(self.survey_times.columns))
 
         # Organize the fields based on major name of SurveyCollection
         cols_multiidx = pd.MultiIndex.from_tuples(
