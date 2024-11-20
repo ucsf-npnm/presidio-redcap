@@ -51,6 +51,13 @@ Survey_Timestamp = SurveyCollection(
     "Timestamp", [SurveyItem("Timestamp", re.compile(r"(date)|(time)"))]
 )
 
+Survey_SSS = SurveyCollection(
+    "Stanford_Sleepiness_Scale",
+    [
+        SurveyItem("SSS", re.compile(r"sss")),
+    ],
+)
+
 Survey_VAS = SurveyCollection(
     "Visual_Analogue_Scale",
     [
