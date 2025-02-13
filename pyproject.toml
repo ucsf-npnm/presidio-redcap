@@ -1,62 +1,68 @@
-[tool.poetry]
+[project]
 name = "presidio-redcap"
-version = "0.1.0"
-description = "Interface for Behavioral and Biometric Database for Presidio"
-documentation = "https://presidio-redcap.readthedocs.io"
-authors = ["Ankit Khambhati <akhambhati@gmail.com>"]
-
-[tool.poetry.dependencies]
-python = "^3.10"
-pycap = {extras = ["pandas"], version = "^2.1.0"}
-pandas = "^1.4.2"
-dacite = "^1.6.0"
-
-[tool.poetry.dev-dependencies]
-pytest = "^7.1.1"
-coverage = {version = "^6.3.2", extras = ["toml"]}
-pytest-cov = "^3.0.0"
-pytest-mock = "^3.7.0"
-black = "^22.3.0"
-flake8 = "^4.0.1"
-flake8-bandit = "^3.0.0"
-flake8-black = "^0.3.2"
-flake8-bugbear = "^22.3.23"
-flake8-import-order = "^0.18.1"
-safety = "^1.10.3"
-mypy = "^0.942"
-typeguard = "^2.13.3"
-flake8-annotations = "^2.8.0"
-flake8-docstrings = "^1.6.0"
-darglint = "^1.8.1"
-xdoctest = "^1.0.0"
-Pygments = "^2.11.2"
-Sphinx = "^4.5.0"
-sphinx-autodoc-typehints = "^1.18.1"
-codecov = "^2.1.12"
-commitizen = "^2.24.0"
-ipykernel = "^6.13.0"
-
-[tool.coverage.paths]
-source = ["src", "*/site-packages"]
-
-[tool.coverage.run]
-branch = true
-source = ["presidio_redcap"]
-
-[tool.coverage.report]
-show_missing = true
-fail_under = 100
-
-[tool.commitizen]
-name = "cz_conventional_commits"
-version = "0.1.0"
-tag_format = "$version"
-version_files = [
-    "src/presidio_redcap/__init__.py",
-    "pyproject.toml:version"
+dynamic = ["version"]
+description = "Interface for RedCap Database for Presidio"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "dacite>=1.9.2",
+    "pandas>=2.2.3",
+    "pycap>=2.6.0",
 ]
-bump_message = "bump: $current_version → $new_version [skip-ci]"
+
+[dependency-groups]
+dev = [
+    "poethepoet>=0.32.2",
+    "pyright>=1.1.394",
+    "pytest>=8.3.4",
+    "ruff>=0.9.6",
+]
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling", "uv-dynamic-versioning"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
+
+[tool.ruff]
+# if this is a library, enter the _minimum_ version you
+# want to support, otherwise do py313
+target-version = "py313"
+line-length = 79  # use whatever number makes you happy
+
+[tool.ruff.lint]
+# you can see the looong list of rules here:
+# https://docs.astral.sh/ruff/rules/
+# here's a couple to start with
+select = [
+	"A",    # warn about shadowing built-ins
+	"E",    # style stuff, whitespaces
+	"F",    # important pyflakes lints
+	"I",    # import sorting
+	"N",    # naming
+	"T100", # breakpoints (probably don't want these in prod!)
+]
+# if you're feeling confident you can do:
+# select = ["ALL"]
+# and then manually ignore annoying ones:
+# ignore = [...]
+
+[tool.ruff.lint.isort]
+# so it knows to group first-party stuff last
+known-first-party = ["presidio-redcap"]
+
+[tool.pyright]
+venvPath = "."          # uv installs the venv in the current dir
+venv = ".venv"          #       in a folder called `.venv`
+strict = ["**/*.py"]    # use 'strict' checking on all files
+pythonVersion = "3.13"  # if library, specify the _lowest_ you support
+
+[tool.poe.tasks]
+# run with eg `uv run poe fmt`
+fmt = "ruff format"
+lint = "ruff check --fix"
+check = "pyright"
+test = "pytest"
+# run all the above
+all = [ {ref="fmt"}, {ref="lint"}, {ref="check"}, {ref="test"} ]
