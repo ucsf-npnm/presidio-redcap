@@ -4,131 +4,72 @@
 # Import #
 # Standard Libraries #
 from dataclasses import dataclass
-from typing import List, Union
 
 # Third-Party Packages #
-import numpy as np
-import pandas as pd
-import redcap as rc
+import pandas as pd  # type: ignore
+from redcap.project import Project as Project
+
+from .rc_keys import RedcapSecrets as RedcapSecrets
 
 # Local Packages #
-from .rc_keys import RedcapSubject
-from .surveydefs import SurveyCollection
+from .rc_keys import redcap as redcap
 
 
 @dataclass
 class RedcapDB:
-    """Database containing projects related to a single Presidio subject.
+    """Database containing projects related to collection of Presidio subjects.
 
     Attributes:
-        API_URL: URL for accessing the RedCap database.
-        API_SUBJECT: RedcapSubject containing the secrets pertaining to
-            the subject.
+        REDCAP_SECRETS: RedcapSecrets
+        projects: Redcap projects associated with each subject.
     """
 
-    API_URL: str
-    API_SUBJECT: RedcapSubject
+    REDCAP_SECRETS: RedcapSecrets = redcap
+    projects: dict[str, list[Project]] = None
 
-    def connect(self) -> List[Union[rc.Project, None]]:
-        """Establish interface to RedCap via API."""
-        self.projects = [
-            rc.Project(self.API_URL, api_key)
-            for api_key in self.API_SUBJECT.API_KEYS
-        ]
-        return self.projects
+    def __post_init__(self):
+        self.connect()
 
-    @property
-    def full_dataframe(self) -> pd.DataFrame:
-        """Construct a DataFrame using all RedCap Project records."""
-        df = pd.concat(
+    def connect(self) -> None:
+        self.projects: dict[str, list[Project]] = dict(
             [
-                pd.DataFrame.from_dict(
-                    proj.export_records(export_survey_fields=True)
+                (
+                    subject_id,
+                    [
+                        Project(self.REDCAP_SECRETS.API_URL, api_key)
+                        for api_key in self.REDCAP_SECRETS.get_subject(
+                            subject_id
+                        ).API_KEYS
+                    ],
                 )
-                for proj in self.projects
+                for subject_id in self.REDCAP_SECRETS.subject_ids
             ]
-        ).reset_index(drop=True)
-        return df
-
-    @property
-    def survey_times(self) -> pd.DataFrame:
-        """Retrieve fields with date or time information."""
-        date_time_fields = [
-            field
-            for field in self.full_dataframe.columns
-            if (("date" in field.lower()) or ("time" in field.lower()))
-        ]
-        time_frame = self.full_dataframe[date_time_fields].apply(
-            lambda x: pd.to_datetime(x, errors="coerce")
-        )
-        time_frame.name = "Timestamp"
-        return time_frame
-
-    def get_survey_as_dataframe(
-        self,
-        survey: SurveyCollection,
-        index_by_survey_times: bool = True,
-        empty_to_nan: bool = True,
-        cast_as_float: bool = True,
-    ) -> pd.DataFrame:
-        """Extract DataFrames for a SurveyCollection object."""
-        # Map the current fields onto the fields defined by SurveyCollection
-        all_fields = self.full_dataframe.columns
-        field_mapper = dict(
-            (field, survey.find_equivalent(field)[0])
-            for field in all_fields
-            if len(survey.find_equivalent(field)) > 0
         )
 
-        # Select and rename fields based on SurveyCollection
-        survey_dataframe = self.full_dataframe[field_mapper.keys()].rename(
-            columns=field_mapper
-        )
+    def agg_subject(self, subject_id: str) -> pd.DataFrame:
+        """Construct a DataFrame using all RedCap Project records."""
 
-        # Use NaNs instead of blanks to placehold missing data
-        if empty_to_nan:
-            empty_str = survey_dataframe == ""
-            survey_dataframe[empty_str] = np.nan
-
-        # Define whether survey values should be considered numerical and
-        # cast as floats
-        if cast_as_float:
-            survey_dataframe = survey_dataframe.astype(float)
-
-        # Aggregate renamed fields that share root field from SurveyCollection
-        survey_dataframe = pd.concat(
-            [
-                pd.DataFrame(
-                    np.nanmax(
-                        survey_dataframe[col].values.reshape(
-                            len(survey_dataframe), -1
-                        ),
-                        axis=1,
-                    ),
-                    columns=[col],
-                )
-                for col in survey_dataframe.columns.unique()
-            ],
-            axis=1,
-        )
-
-        # Re-index the rows using Timestamp information
-        if index_by_survey_times:
-            survey_dataframe = pd.merge(
-                survey_dataframe,
-                self.survey_times,
-                left_index=True,
-                right_index=True,
+        df_list: list[pd.DataFrame] = []
+        for proj in self.projects[subject_id]:
+            df_rec = pd.DataFrame.from_dict(
+                proj.export_records(export_survey_fields=True)
             )
-            survey_dataframe = survey_dataframe.set_index(
-                list(self.survey_times.columns)
-            )
+            df_rec["project_title"] = proj.export_project_info()[
+                "project_title"
+            ]
+            df_rec["subject_id"] = subject_id
+            df_list.append(df_rec)
+        return pd.concat(df_list).reset_index(drop=True)
 
-        # Organize the fields based on major name of SurveyCollection
-        cols_multiidx = pd.MultiIndex.from_tuples(
-            [(survey.name, field) for field in survey_dataframe.columns],
-            names=["Survey_Type", "field"],
-        )
-        survey_dataframe.columns = cols_multiidx
+    def agg_field_metadata(self, subject_id: str) -> pd.DataFrame:
+        """Construct a DataFrame with metadata corresponding to each survey."""
 
-        return survey_dataframe
+        df_list: list[pd.DataFrame] = []
+        for proj in self.projects[subject_id]:
+            df_meta = pd.DataFrame(proj.export_metadata())
+            df_meta["project_title"] = proj.export_project_info()[
+                "project_title"
+            ]
+            df_meta["subject_id"] = subject_id
+            df_list.append(df_meta)
+        return pd.concat(df_list).reset_index(drop=True)

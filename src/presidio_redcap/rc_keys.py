@@ -1,17 +1,12 @@
 # src/presidio_redcap/rc_keys.py
 """Verify and validate user-specific secrets for Presidio."""
 
-# Import #
-# Standard Libraries #
 import json
 import os
 from dataclasses import dataclass
 from typing import List
 
-# Third-Party Packages #
 import dacite
-
-# Local Packages #
 
 
 @dataclass(frozen=True)
@@ -40,7 +35,7 @@ class RedcapSecrets:
     SUBJECTS: List[RedcapSubject]
 
     @property
-    def subject_ids(self) -> List:
+    def subject_ids(self) -> List[str]:
         """List of subject names held by the object."""
         return [rc_subject.NAME for rc_subject in self.SUBJECTS]
 
@@ -49,7 +44,7 @@ class RedcapSecrets:
         return self.SUBJECTS[self.subject_ids.index(subject_id)]
 
 
-ENV_SECRETS = str(os.environ.get("PRESIDIO_SECRETS"))
+ENV_SECRETS = str(os.environ.get("PRESIDIO_REDCAP"))
 redcap = dacite.from_dict(
     data_class=RedcapSecrets, data=json.load(open(ENV_SECRETS, "rb"))["REDCAP"]
 )
