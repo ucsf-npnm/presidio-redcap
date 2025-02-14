@@ -1,17 +1,13 @@
+# pyright: reportUnknownMemberType=false, reportUnknownVariableType=false, reportUnknownArgumentType=false
 # src/presidio_redcap/database.py
 """API interface for Presidio RedCap Database."""
 
-# Import #
-# Standard Libraries #
 from dataclasses import dataclass
 
-# Third-Party Packages #
 import pandas as pd  # type: ignore
 from redcap.project import Project as Project
 
 from .rc_keys import RedcapSecrets as RedcapSecrets
-
-# Local Packages #
 from .rc_keys import redcap as redcap
 
 
@@ -24,8 +20,8 @@ class RedcapDB:
         projects: Redcap projects associated with each subject.
     """
 
+    projects: dict[str, list[Project]]
     REDCAP_SECRETS: RedcapSecrets = redcap
-    projects: dict[str, list[Project]] = None
 
     def __post_init__(self):
         self.connect()
@@ -51,9 +47,8 @@ class RedcapDB:
 
         df_list: list[pd.DataFrame] = []
         for proj in self.projects[subject_id]:
-            df_rec = pd.DataFrame.from_dict(
-                proj.export_records(export_survey_fields=True)
-            )
+            rec = proj.export_records(export_survey_fields=True)
+            df_rec = pd.DataFrame.from_dict(rec)
             df_rec["project_title"] = proj.export_project_info()[
                 "project_title"
             ]

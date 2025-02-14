@@ -10,5 +10,5 @@ import pytest
 def mock_env(monkeypatch):
     """Set mock environment variables for testing configs."""
     monkeypatch.setenv(
-        "PRESIDIO_SECRETS", os.path.abspath("./assets/presidio_secrets.json")
+        "PRESIDIO_REDCAP", os.path.abspath("./assets/presidio_redcap.json")
     )
