@@ -1,12 +1,11 @@
-# src/presidio_redcap/secrets.py
+# src/presidio_redcap/rc_keys.py
 """Verify and validate user-specific secrets for Presidio."""
-
 
 # Import #
 # Standard Libraries #
-from dataclasses import dataclass
 import json
 import os
+from dataclasses import dataclass
 from typing import List
 
 # Third-Party Packages #
@@ -30,7 +29,7 @@ class RedcapSubject:
 
 @dataclass(frozen=True)
 class RedcapSecrets:
-    """Holds pertinent secrets for a collection of subjects in the Presidio Redcap.
+    """Holds secrets for a collection of subjects in the Presidio Redcap.
 
     Attributes:
         API_URL: Location of the API to access RedCap data for Presidio.

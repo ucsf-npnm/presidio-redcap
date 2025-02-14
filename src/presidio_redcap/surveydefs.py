@@ -1,11 +1,10 @@
 # src/presidio_redcap/surveydefs.py
 """Definitions for relevant Survey scales."""
 
-
 # Import #
 # Standard Libraries #
-from dataclasses import dataclass
 import re
+from dataclasses import dataclass
 from typing import List
 
 # Third-Party Packages #
@@ -19,14 +18,15 @@ class SurveyItem:
 
     Attributes:
         item: Define name of the survey item.
-        synonyms: Regex pattern defining synonyms considered equivalent to the item.
+        synonyms: Regex pattern defining synonyms considered
+            equivalent to the item.
     """
 
     item: str
     synonyms: re.Pattern
 
     def is_equivalent(self, reference: str) -> bool:
-        """Determine if the reference string is equivalent to the survey item."""
+        """Determine if the reference string is equivalent to survey item."""
         return self.synonyms.search(reference) is not None
 
 
@@ -36,7 +36,7 @@ class SurveyCollection:
 
     Attributes:
         name: Name of the collection of survey items.
-        fields: SurveyItem objects that are naturally grouped under the collection.
+        fields: SurveyItem objects that are grouped under the collection.
     """
 
     name: str
@@ -44,7 +44,11 @@ class SurveyCollection:
 
     def find_equivalent(self, reference: str) -> List[str]:
         """Find survey item corresponding to reference string."""
-        return [sitem.item for sitem in self.fields if sitem.is_equivalent(reference)]
+        return [
+            sitem.item
+            for sitem in self.fields
+            if sitem.is_equivalent(reference)
+        ]
 
 
 Survey_Timestamp = SurveyCollection(

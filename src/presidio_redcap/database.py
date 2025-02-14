@@ -1,7 +1,6 @@
 # src/presidio_redcap/database.py
 """API interface for Presidio RedCap Database."""
 
-
 # Import #
 # Standard Libraries #
 from dataclasses import dataclass
@@ -13,7 +12,7 @@ import pandas as pd
 import redcap as rc
 
 # Local Packages #
-from .secrets import RedcapSubject
+from .rc_keys import RedcapSubject
 from .surveydefs import SurveyCollection
 
 
@@ -23,7 +22,8 @@ class RedcapDB:
 
     Attributes:
         API_URL: URL for accessing the RedCap database.
-        API_SUBJECT: RedcapSubject containing the secrets pertaining to the subject.
+        API_SUBJECT: RedcapSubject containing the secrets pertaining to
+            the subject.
     """
 
     API_URL: str
@@ -32,7 +32,8 @@ class RedcapDB:
     def connect(self) -> List[Union[rc.Project, None]]:
         """Establish interface to RedCap via API."""
         self.projects = [
-            rc.Project(self.API_URL, api_key) for api_key in self.API_SUBJECT.API_KEYS
+            rc.Project(self.API_URL, api_key)
+            for api_key in self.API_SUBJECT.API_KEYS
         ]
         return self.projects
 
@@ -40,7 +41,12 @@ class RedcapDB:
     def full_dataframe(self) -> pd.DataFrame:
         """Construct a DataFrame using all RedCap Project records."""
         df = pd.concat(
-            [pd.DataFrame.from_dict(proj.export_records(export_survey_fields=True)) for proj in self.projects]
+            [
+                pd.DataFrame.from_dict(
+                    proj.export_records(export_survey_fields=True)
+                )
+                for proj in self.projects
+            ]
         ).reset_index(drop=True)
         return df
 
@@ -52,9 +58,8 @@ class RedcapDB:
             for field in self.full_dataframe.columns
             if (("date" in field.lower()) or ("time" in field.lower()))
         ]
-        time_frame = (
-            self.full_dataframe[date_time_fields]
-            .apply(lambda x: pd.to_datetime(x, errors="coerce"))
+        time_frame = self.full_dataframe[date_time_fields].apply(
+            lambda x: pd.to_datetime(x, errors="coerce")
         )
         time_frame.name = "Timestamp"
         return time_frame
@@ -66,7 +71,7 @@ class RedcapDB:
         empty_to_nan: bool = True,
         cast_as_float: bool = True,
     ) -> pd.DataFrame:
-        """Extract DataFrames for corresponding to a SurveyCollection object."""
+        """Extract DataFrames for a SurveyCollection object."""
         # Map the current fields onto the fields defined by SurveyCollection
         all_fields = self.full_dataframe.columns
         field_mapper = dict(
@@ -95,7 +100,9 @@ class RedcapDB:
             [
                 pd.DataFrame(
                     np.nanmax(
-                        survey_dataframe[col].values.reshape(len(survey_dataframe), -1),
+                        survey_dataframe[col].values.reshape(
+                            len(survey_dataframe), -1
+                        ),
                         axis=1,
                     ),
                     columns=[col],
@@ -107,10 +114,15 @@ class RedcapDB:
 
         # Re-index the rows using Timestamp information
         if index_by_survey_times:
-            survey_dataframe = pd.merge(survey_dataframe, 
-                    self.survey_times, left_index=True, right_index=True)
+            survey_dataframe = pd.merge(
+                survey_dataframe,
+                self.survey_times,
+                left_index=True,
+                right_index=True,
+            )
             survey_dataframe = survey_dataframe.set_index(
-                    list(self.survey_times.columns))
+                list(self.survey_times.columns)
+            )
 
         # Organize the fields based on major name of SurveyCollection
         cols_multiidx = pd.MultiIndex.from_tuples(
