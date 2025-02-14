@@ -1,3 +1,4 @@
+# type: ignore
 # tests/test_rc_keys.py
 """Test accessibility of Presidio Secrets."""
 
@@ -21,7 +22,7 @@ def test_redcap_get_subject(mock_env) -> None:
     """Ensure RedcapSubject can be retrieved."""
     from presidio_redcap import rc_keys
 
-    #redcap = rc_keys.get_redcap("./assets/presidio_redcap.json")
+    # redcap = rc_keys.get_redcap("./assets/presidio_redcap.json")
     rc_subject = rc_keys.redcap.get_subject("S2")
     print("\n {}".format(rc_keys.redcap.subject_ids))
     print("\n {}".format(rc_subject))

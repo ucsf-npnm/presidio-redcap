@@ -43,10 +43,14 @@ class RedcapSecrets:
         """Retrieve RedcapSubject API keys for a desired subject."""
         return self.SUBJECTS[self.subject_ids.index(subject_id)]
 
-def get_redcap(path: str = None) -> RedcapSecrets:
-    if path is None:
-        path = str(os.environ.get("PRESIDIO_REDCAP"))
-    return dacite.from_dict(data_class=RedcapSecrets, data=json.load(open(path, "rb"))["REDCAP"])
+
+def get_redcap(
+    path: str = str(os.environ.get("PRESIDIO_REDCAP")),
+) -> RedcapSecrets:
+    return dacite.from_dict(
+        data_class=RedcapSecrets, data=json.load(open(path, "rb"))["REDCAP"]
+    )
+
 
 """
 ENV_SECRETS = str(os.environ.get("PRESIDIO_REDCAP"))
