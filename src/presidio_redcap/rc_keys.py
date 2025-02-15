@@ -1,12 +1,10 @@
-# src/presidio_redcap/secrets.py
+# src/presidio_redcap/rc_keys.py
 """Verify and validate user-specific secrets for Presidio."""
 
-
-from dataclasses import dataclass
 import json
 import os
+from dataclasses import dataclass
 from typing import List
-
 
 import dacite
 
@@ -26,7 +24,7 @@ class RedcapSubject:
 
 @dataclass(frozen=True)
 class RedcapSecrets:
-    """Holds pertinent secrets for a collection of subjects in the Presidio Redcap.
+    """Holds secrets for a collection of subjects in the Presidio Redcap.
 
     Attributes:
         API_URL: Location of the API to access RedCap data for Presidio.
@@ -36,8 +34,28 @@ class RedcapSecrets:
     API_URL: str
     SUBJECTS: List[RedcapSubject]
 
+    @property
+    def subject_ids(self) -> List[str]:
+        """List of subject names held by the object."""
+        return [rc_subject.NAME for rc_subject in self.SUBJECTS]
 
-ENV_SECRETS = str(os.environ.get("PRESIDIO_SECRETS"))
+    def get_subject(self, subject_id: str) -> RedcapSubject:
+        """Retrieve RedcapSubject API keys for a desired subject."""
+        return self.SUBJECTS[self.subject_ids.index(subject_id)]
+
+
+def get_redcap(
+    path: str = str(os.environ.get("PRESIDIO_REDCAP")),
+) -> RedcapSecrets:
+    return dacite.from_dict(
+        data_class=RedcapSecrets, data=json.load(open(path, "rb"))["REDCAP"]
+    )
+
+
+"""
+ENV_SECRETS = str(os.environ.get("PRESIDIO_REDCAP"))
 redcap = dacite.from_dict(
     data_class=RedcapSecrets, data=json.load(open(ENV_SECRETS, "rb"))["REDCAP"]
 )
+"""
+redcap = get_redcap()
