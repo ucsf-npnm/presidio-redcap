@@ -20,7 +20,6 @@ class RedcapDB:
         projects: Redcap projects associated with each subject.
     """
 
-    projects: dict[str, list[Project]]
     REDCAP_SECRETS: RedcapSecrets = redcap
 
     def __post_init__(self):
