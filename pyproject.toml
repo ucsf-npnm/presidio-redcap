@@ -26,6 +26,11 @@ build-backend = "hatchling.build"
 [tool.hatch.version]
 source = "uv-dynamic-versioning"
 
+[tool.uv-dynamic-versioning]
+vcs = "git"
+style = "semver"
+bump = "true"
+
 [tool.ruff]
 # if this is a library, enter the _minimum_ version you
 # want to support, otherwise do py313
